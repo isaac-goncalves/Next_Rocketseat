@@ -1,5 +1,5 @@
 import Head from "next/head";
-
+import Header from "./Header";
 
 export default function Home() {
   return (
@@ -7,7 +7,7 @@ export default function Home() {
       <Head>
         <title>Ignews</title>
       </Head>
-   
-       </>
+      <Header/>
+    </>
   )
 }
