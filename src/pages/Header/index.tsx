@@ -1,4 +1,6 @@
 import React from "react";
+import SignInButton from "../SignInButton";
+import { signIn } from "next-auth/client";
 
 import styles from "./styles.module.scss";
 
@@ -13,6 +15,7 @@ export default function Header() {
           </a>
           <a href="#">Posts</a>
         </nav>
+        <SignInButton />
       </div>
     </header>
   );
