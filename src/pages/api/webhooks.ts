@@ -23,14 +23,19 @@ export const config = {
   },
 };
 
-const relevantEvents = new Set(["checkout.session.completed"]);
+const relevantEvents = new Set([
+  "checkout.session.completed",
+  "customer.subscription.created",
+  "customer.subscription.updated",
+  "customer.subscription.deleted",
+]);
 
 export default async (req: NextApiRequest, res: NextApiResponse) => {
   if (req.method === "POST") {
     const buf = await buffer(req);
 
     const secret = req.headers["stripe-signature"];
-    console.log('Secret:', secret);
+    // console.log("Secret:", secret);
 
     let event: Stripe.Event;
 
@@ -43,22 +48,40 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
     } catch (err) {
       return res.status(400).send(`Webhook error: ${err.message}`);
     }
-    
-    console.log(event)
+
+    // console.log(event);
 
     const type = event.type;
 
     if (relevantEvents.has(type)) {
       try {
         switch (type) {
-          case "checkout.session.completed":
+          case "customer.subscription.created":
+          case "customer.subscription.updated":
+          case "customer.subscription.deleted":
 
-          const checkoutSession = event.data.object as Stripe.Checkout.Session
+          const subscription = event.data.object as Stripe.Subscription;
+
+          console.log("Subscription Created", type);
 
           await saveSubscription(
-            checkoutSession.subscription.toString(),
-            checkoutSession.customer.toString()
-          )
+            subscription.id,
+            subscription.customer.toString(),
+            type === "customer.subscription.created"
+              );
+
+            break;
+          case "checkout.session.completed":
+
+            console.log("Session completed");
+
+            const checkoutSession = event.data
+              .object as Stripe.Checkout.Session;
+            await saveSubscription(
+              checkoutSession.subscription.toString(),
+              checkoutSession.customer.toString(),
+              true
+              );
 
             break;
           default:
@@ -68,11 +91,10 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
         return res.json({ error: "Webhook handler failed." });
       }
 
-      console.log("Evento recebido ", JSON.stringify(event, null, 2));
+      // console.log("Evento recebido ", JSON.stringify(event, null, 2));
     }
 
     res.status(200).json({ received: true });
-
   } else {
     res.setHeader("Allow", "POST");
     res.status(405).end("Method not allowed");

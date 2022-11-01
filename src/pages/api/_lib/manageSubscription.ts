@@ -1,19 +1,70 @@
-import { fauna } from "../../../services/fauna";
 import { query as q } from "faunadb";
-
+import { fauna } from "../../../services/fauna";
+import { stripe } from "../../../services/stripe";
+ 
 export async function saveSubscription(
+  subscriptionId: string,
   costumerId: string,
-  subscriptionId: string
+  createAction = false
 ) {
   // buscar no banco de dados as informações usando o custumerId
-  console.log(costumerId, subscriptionId);
+  console.log(subscriptionId, costumerId);
+  console.log("teste");
+ 
+  try{
+    
+    const userRef = await fauna.query(
+    q.Get(q.Match(q.Index("user_by_stripe_costumer_id"), costumerId))
+      );
+    }
+    catch(err){
+      console.log(err);
+    }
+      
 
-  const userRef = await fauna.query(
-    q.Select(
-      "ref",
-      q.Get(q.Match(q.Index("user_by_stripe_costumer_id"), costumerId))
-    )
-  );
 
-  console.log(userRef);
+
+
+
+  // const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+  
+  // console.log("teste");
+  // console.log("Subscriptioon", subscription);
+
+  // const subscriptionData = {
+  //   id: subscription.id,
+  //   userId: userRef,
+  //   status: subscription.status,
+  //   price_id: subscription.items.data[0].price.id,
+  // };
+
+  // if (createAction) {
+
+  //   try{
+
+  //     await fauna.query(
+  //       q.Create(
+  //         q.Collection("subscriptions"), 
+  //         { data: subscriptionData })
+  //         );
+          
+  //         console.log(userRef);
+  //       }
+  //       catch(err){
+  //         console.log(err);
+  //       }
+  // } else {
+  //   await fauna.query(
+  //     q.Replace(
+  //       q.Select(
+  //         "ref",
+  //         q.Get(
+  //           q.Match(
+  //             q.Index("subscription_by_id"), 
+  //             subscriptionId))
+  //       ),
+  //       { data: subscriptionData }
+  //     )
+  //   );
+  // }
 }

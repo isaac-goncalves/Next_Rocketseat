@@ -26,26 +26,23 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
     let customerId = user.data.stripe_customer_id;
 
     if (!customerId) {
-    
-        const stripeCustomer = await stripe.customers.create({
-            email: session.user.email,
-            // metadata
-          });
+      const stripeCustomer = await stripe.customers.create({
+        email: session.user.email,
+        // metadata
+      });
 
-        await fauna.query(
-            q.Update(q.Ref(q.Collection("users"), user.ref.id), {
-              data: {
-                stripe_customer_id: stripeCustomer.id,
-              },
-            })
-          );
+      await fauna.query(
+        q.Update(q.Ref(q.Collection("users"), user.ref.id), {
+          data: {
+            stripeCustomerId: "teste",
+          },
+        })
+      );
 
-            customerId = stripeCustomer.id;
-
+      customerId = stripeCustomer.id;
     }
 
     console.log(user);
-
 
     const checkoutSession = await stripe.checkout.sessions.create({
       customer: customerId,
