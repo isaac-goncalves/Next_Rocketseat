@@ -27,7 +27,7 @@ export default function Home({product}: homeProps) {
           </h1>
           <p className={styles.test}>
             Get access to all the publications <br />
-            <span>for {product.amount}</span> month
+            <span>for ${product.amount}</span> month
           </p>
           <SubscribeButton />
         </section>
